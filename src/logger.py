@@ -2,7 +2,7 @@ import logging
 from logging.config import dictConfig
 
 
-logging_config = {
+first = {
         'version': 1,
         'disable_existing_loggers': False,
         'formatters': {
@@ -23,8 +23,6 @@ logging_config = {
                 'filename':'logs/work.log',
                 'backupCount':10,
                 },
-
-
             },
         'loggers': {
             '': {
@@ -40,5 +38,43 @@ logging_config = {
             }
         }
 
-
-dictConfig(logging_config)
+simple_no_file = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'formatters': {
+            'standard': {
+                'format':'[%(levelname)s]: %(message)s'
+                },
+            },
+        'handlers': {
+            'default': {
+                'level':'INFO',
+                'class':'logging.StreamHandler',
+                'formatter':'standard',
+                },
+            'persistant': {
+                'level':'DEBUG',
+                'class':'logging.handlers.RotatingFileHandler',
+                'formatter':'standard',
+                'filename':'logs/work.log',
+                'backupCount':10,
+                },
+            },
+        'loggers': {
+            '': {
+                'handlers': ['default', 'persistant'],
+                'level': 'DEBUG',
+                'propagate': True
+                },
+            'bad_things': {
+                'handlers': ['default'],
+                'level': 'WARN',
+                'propagate': False
+                },
+            }
+        }
+def start_logger(id):
+    if id==0:
+        dictConfig(first)
+    elif id==1:
+        dictConfig(simple_no_file)
