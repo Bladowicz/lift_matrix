@@ -1,4 +1,29 @@
 import argparse
+import logging
+import os
+import sys
+
+def validate_args(conf):
+    if not os.path.exists(conf.in_file):
+        logging.error('Input file does not exist')
+        sys.exit()
+    else:
+        if not os.access(conf.in_file, 4):
+            logging.error('Dont have permissions to read input file.')
+            sys.exit()
+
+    if os.path.exists(conf.out_file):
+        if conf.force_overwrite:
+            logging.warning('Output file exists - overwriting.')
+        else:
+            logging.error('Output file already exists. Please change name, of add -F')
+            sys.exit()
+
+    if not os.access(conf.out_file, 2):
+        logging.error('Dont have permissions to write in output file.')
+        sys.exit()
+
+
 
 
 def _get():
@@ -20,16 +45,13 @@ def _get():
                                 help='Cut top C of occurences',
                                 default=250)
 
-    #parser.add_argument('-s', action='store', dest='simple_value',
-    #                            help='Store a simple value')
-    #
-    #parser.add_argument('-c', action='store_const', dest='constant_value',
-    #                            const='value-to-store',
-    #                                                help='Store a constant value')
-    #
-    #parser.add_argument('-t', action='store_true', default=False,
-    #                            dest='boolean_switch',
-    #                                                help='Set a switch to true')
+    parser.add_argument('-l', action='store_true', default=False,
+                                dest='clog',
+                                                    help='Count logarithm of value.')
+
+    parser.add_argument('-F', action='store_true', default=False,
+                                dest='force_overwrite',
+                                                    help='Overwrite output file.')
     #parser.add_argument('-f', action='store_false', default=False,
     #                            dest='boolean_switch',
     #                                                help='Set a switch to false')
@@ -48,5 +70,7 @@ def _get():
     #                                                help='Add different values to list')
     #
     parser.add_argument('--version', action='version', version='%(prog)s 1.0')
-    return parser.parse_args()
+    out =  parser.parse_args()
+    validate_args(out)
+    return out
 results = _get()

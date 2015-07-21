@@ -1,10 +1,10 @@
 #!/usr/bin/python
 # coding: utf-8
+import logging
 import collections
 import sys
 import src
-import logging
-
+import math
 
 
 def line_to_pairs(ll):
@@ -58,18 +58,23 @@ def check_names(nn):
     names = map(lambda x: x[0], names)
     return sorted(names)
 
+def prepare_prob_for_names(use_log):
+    def probability_for_names(x, y):
+        name = tuple(sorted([x, y]))
+        if name[0] == name[1]:
+            out = 1
+        else:
+            try:
+                if not use_log:
+                    out = pairs[name]/((single[name[0]] * single[name[1]])/total)
+                else:
+                    out = math.log(1/(pairs[name]/((single[name[0]] * single[name[1]])/total) + 0.00000000000000000000001))
+            except KeyError:
+                logging.error('Key not found')
+                out = '--'
+        return out
+    return probability_for_names
 
-def probability_for_names(x, y):
-    name = tuple(sorted([x, y]))
-    if name[0] == name[1]:
-        out = 1
-    else:
-        try:
-            out = pairs[name]/((single[name[0]] * single[name[1]])/total)
-        except KeyError:
-            logging.error('Key not found')
-            out = '--'
-    return out
 
 def main():
     global config, single, pairs, total
@@ -91,6 +96,7 @@ def main():
     sys.stdout.flush()
     logging.info('Done counting. Triming to {0} top counts.'.format(config.cut))
     names = check_names(single)
+    probability_for_names = prepare_prob_for_names(config.clog)
     with open(config.out_file, 'w') as fw:
         logging.info('Writing to file {}'.format(config.out_file))
         fw.write('\t'.join(names)+'\n')
