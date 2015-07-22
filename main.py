@@ -41,7 +41,7 @@ def prepare_line_processor(spaces):
     namespaces = set(spaces)
     def fun(line):
         all_parts = set()
-        if line[0][0] == '1': all_parts.add('1')
+        if line[0][0] == '1': all_parts.add('con_1')
         #all_parts.add(1) if line[0][0] == True
         gen = (part for part in line if part[0] in namespaces)
         for part in gen:
@@ -74,6 +74,9 @@ def prepare_prob_for_names(use_log):
             except KeyError:
                 logging.error('Key not found')
                 out = '--'
+            except ZeroDivisionError:
+                logging.error('Zero dividead x:{} y:{}'.format(x, y))
+
         return out
     return probability_for_names
 
@@ -98,7 +101,12 @@ def main():
     sys.stdout.flush()
     logging.info('Done counting. Triming to {0} top counts.'.format(config.cut))
     names = check_names(single)
+    i = names.index('con_1')
     probability_for_names = prepare_prob_for_names(config.clog)
+    t = set(names)
+    t.remove('con_1')
+    for y in t:
+        print probability_for_names(i, y)
     with open(config.out_file, 'w') as fw:
         logging.info('Writing to file {}'.format(config.out_file))
         fw.write('\t'.join(names)+'\n')

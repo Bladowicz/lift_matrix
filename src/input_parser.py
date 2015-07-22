@@ -18,12 +18,16 @@ def validate_args(conf):
             if not os.access(conf.out_file, 2):
                 logging.error('Dont have permissions to write in output file.')
                 sys.exit()
-
         else:
             logging.error('Output file already exists. Please change name, of add -F')
             sys.exit()
 
-
+    if conf.lift_dev:
+        try:
+            conf.lift_dev = float(conf.lift_dev)
+        except:
+            logging.error('Failed to get min lift dev value')
+            sys.exit()
 
 
 
@@ -37,6 +41,9 @@ def _get():
                                 help='Output file in matrix format',
                                 default='output.txt')
 
+    parser.add_argument('-C', action='store', dest='lift_dev',
+                                help='Min lift deviation from conversion',
+                                default=None)
 
     parser.add_argument('-n', action='store', dest='namespaces',
                                 help='String made of concatenated first laters of namespaces',
