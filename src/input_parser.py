@@ -15,13 +15,14 @@ def validate_args(conf):
     if os.path.exists(conf.out_file):
         if conf.force_overwrite:
             logging.warning('Output file exists - overwriting.')
+            if not os.access(conf.out_file, 2):
+                logging.error('Dont have permissions to write in output file.')
+                sys.exit()
+
         else:
             logging.error('Output file already exists. Please change name, of add -F')
             sys.exit()
 
-    if not os.access(conf.out_file, 2):
-        logging.error('Dont have permissions to write in output file.')
-        sys.exit()
 
 
 

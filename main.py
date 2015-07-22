@@ -41,6 +41,8 @@ def prepare_line_processor(spaces):
     namespaces = set(spaces)
     def fun(line):
         all_parts = set()
+        if line[0][0] == '1': all_parts.add('1')
+        #all_parts.add(1) if line[0][0] == True
         gen = (part for part in line if part[0] in namespaces)
         for part in gen:
             all_parts.update(set(part[1:].split()))
