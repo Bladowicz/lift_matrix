@@ -42,7 +42,6 @@ def prepare_line_processor(spaces):
     def fun(line):
         all_parts = set()
         if line[0][0] == '1': all_parts.add('con_1')
-        #all_parts.add(1) if line[0][0] == True
         gen = (part for part in line if part[0] in namespaces)
         for part in gen:
             all_parts.update(set(part[1:].split()))
@@ -70,13 +69,12 @@ def prepare_prob_for_names(use_log):
                 if not use_log:
                     out = pairs[name]/((single[name[0]] * single[name[1]])/total)
                 else:
-                    out = math.log(1/(pairs[name]/((single[name[0]] * single[name[1]])/total) + 0.00000000000000000000001))
+                    out = math.log(1/(pairs[name]/((single[name[0]] * single[name[1]])/total) + 0.01))
             except KeyError:
                 logging.error('Key not found')
                 out = '--'
             except ZeroDivisionError:
                 logging.error('Zero dividead x:{} y:{}'.format(x, y))
-
         return out
     return probability_for_names
 
@@ -106,7 +104,8 @@ def main():
     t = set(names)
     t.remove('con_1')
     for y in t:
-        print probability_for_names(i, y)
+        #print probability_for_names(i, y)
+        pass
     with open(config.out_file, 'w') as fw:
         logging.info('Writing to file {}'.format(config.out_file))
         fw.write('\t'.join(names)+'\n')
