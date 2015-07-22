@@ -29,6 +29,16 @@ def validate_args(conf):
             logging.error('Failed to get min lift dev value')
             sys.exit()
 
+    if conf.lift_dump_file:
+        if os.path.exists(conf.lift_dump_file):
+            if conf.force_overwrite:
+                logging.warning('Dump file exists - overwriting.')
+                if not os.access(conf.lift_dump_file, 2):
+                    logging.error('Dont have permissions to write in dump file.')
+                    sys.exit()
+            else:
+                logging.error('Dump file already exists. Please change name, of add -F')
+                sys.exit()
 
 
 def _get():
@@ -45,6 +55,10 @@ def _get():
                                 help='Min lift deviation from conversion',
                                 default=None)
 
+    parser.add_argument('-d', action='store', dest='lift_dump_file',
+                                help='Output file for dumped features from -C',
+                                default=None)
+    
     parser.add_argument('-n', action='store', dest='namespaces',
                                 help='String made of concatenated first laters of namespaces',
                                 default='h')

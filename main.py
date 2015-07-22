@@ -75,9 +75,24 @@ def prepare_prob_for_names(use_log):
                 out = '--'
             except ZeroDivisionError:
                 logging.error('Zero dividead x:{} y:{}'.format(x, y))
+#                for k,v in pairs.iteritems():
+#                    print k,v
         return out
     return probability_for_names
-
+def remove_features(names, dev, probability, fw):
+    bad_names = set()
+    t = set(names)
+    t.remove('con_1')
+    for y in t:
+        if abs(1 - probability('con_1', y)) < config.lift_dev:
+            bad_names.add(y)
+    for e in bad_names:
+        names.remove(e)
+    logging.info('Features that were insignificant {}'.format(len(bad_names)))
+    if fw:
+        with open(fw, 'w') as fw:
+            for line in bad_names:
+                fw.write(line + '\n')
 
 def main():
     global config, single, pairs, total
@@ -99,13 +114,9 @@ def main():
     sys.stdout.flush()
     logging.info('Done counting. Triming to {0} top counts.'.format(config.cut))
     names = check_names(single)
-    i = names.index('con_1')
     probability_for_names = prepare_prob_for_names(config.clog)
-    t = set(names)
-    t.remove('con_1')
-    for y in t:
-        #print probability_for_names(i, y)
-        pass
+    if config.lift_dev:
+        remove_features(names, config.lift_dev, probability_for_names, config.lift_dump_file)
     with open(config.out_file, 'w') as fw:
         logging.info('Writing to file {}'.format(config.out_file))
         fw.write('\t'.join(names)+'\n')
