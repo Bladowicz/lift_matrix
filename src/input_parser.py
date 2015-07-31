@@ -42,7 +42,7 @@ def validate_args(conf):
 
 
 def _get():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description='This program, creates lift matrix basing on .vw files.')
     parser.add_argument('-f', action='store', dest='in_file',
                                 help='Input file in Vopal Wabbit input format',
                                 default='input.vw')
