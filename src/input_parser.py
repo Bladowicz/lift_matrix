@@ -4,6 +4,7 @@ import os
 import sys
 
 def validate_args(conf):
+    conf.in_file = conf.in_file[0]
     if not os.path.exists(conf.in_file):
         logging.error('Input file does not exist')
         sys.exit()
@@ -12,15 +13,12 @@ def validate_args(conf):
             logging.error('Dont have permissions to read input file.')
             sys.exit()
 
+    conf.out_file = conf.out_file[0]
     if os.path.exists(conf.out_file):
-        if conf.force_overwrite:
             logging.warning('Output file exists - overwriting.')
             if not os.access(conf.out_file, 2):
                 logging.error('Dont have permissions to write in output file.')
                 sys.exit()
-        else:
-            logging.error('Output file already exists. Please change name, of add -F')
-            sys.exit()
 
     if conf.lift_dev:
         try:
@@ -31,25 +29,23 @@ def validate_args(conf):
 
     if conf.lift_dump_file:
         if os.path.exists(conf.lift_dump_file):
-            if conf.force_overwrite:
-                logging.warning('Dump file exists - overwriting.')
-                if not os.access(conf.lift_dump_file, 2):
-                    logging.error('Dont have permissions to write in dump file.')
-                    sys.exit()
-            else:
-                logging.error('Dump file already exists. Please change name, of add -F')
+            logging.warning('Dump file exists - overwriting.')
+            if not os.access(conf.lift_dump_file, 2):
+                logging.error('Dont have permissions to write in dump file.')
                 sys.exit()
 
 
 def _get():
     parser = argparse.ArgumentParser(description='This program, creates lift matrix basing on .vw files.')
-    parser.add_argument('-f', action='store', dest='in_file',
+    parser.add_argument(action='store', dest='in_file',
                                 help='Input file in Vopal Wabbit input format',
-                                default='input.vw')
+                                nargs=1,
+                                )
 
-    parser.add_argument('-o', action='store', dest='out_file',
+    parser.add_argument(action='store', dest='out_file',
                                 help='Output file in matrix format',
-                                default='output.txt')
+                                nargs=1,
+                                )
 
     parser.add_argument('-C', action='store', dest='lift_dev',
                                 help='Min lift deviation from conversion',
@@ -71,9 +67,9 @@ def _get():
                                 dest='clog',
                                                     help='Count logarithm of value.')
 
-    parser.add_argument('-F', action='store_true', default=False,
-                                dest='force_overwrite',
-                                                    help='Overwrite output file.')
+   # parser.add_argument('-F', action='store_true', default=False,
+   #                             dest='force_overwrite',
+   #                                                 help='Overwrite output file.')
     #parser.add_argument('-f', action='store_false', default=False,
     #                            dest='boolean_switch',
     #                                                help='Set a switch to false')

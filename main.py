@@ -74,22 +74,24 @@ def prepare_prob_for_names(use_log):
                 logging.error('Key not found')
                 out = '--'
             except ZeroDivisionError:
-                logging.error('Zero dividead x:{} y:{}'.format(x, y))
-#                for k,v in pairs.iteritems():
-#                    print k,v
+                logging.error('Zero dividead x:{} y:{}\n s1:{}\n s2:{}\n t:{}'.format(
+                    x, y, single[name[0]], single[name[1]], total ))
         return out
     return probability_for_names
+
 def remove_features(names, dev, probability, fw):
     bad_names = set()
     t = set(names)
-    t.remove('con_1')
     for y in t:
         if abs(1 - probability('con_1', y)) < config.lift_dev:
             bad_names.add(y)
     for e in bad_names:
         names.remove(e)
+
+    names.insert(0, 'con_1')
     logging.info('Features that were insignificant {}'.format(len(bad_names)))
     if fw:
+        logging.info('Writing down insignificant feature to "{}"'.format(fw))
         with open(fw, 'w') as fw:
             for line in bad_names:
                 fw.write(line + '\n')
