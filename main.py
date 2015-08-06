@@ -51,7 +51,11 @@ def prepare_line_processor(spaces):
 
 def check_names(nn):
     names = sorted(nn.iteritems(), reverse=True, key=lambda x: x[1])[:int(config.cut)]
-    max_name_len = max((len(names[0][0]), len(names[-1][0])))
+    try:
+        max_name_len = max((len(names[0][0]), len(names[-1][0])))
+    except IndexError:
+        logging.error('List of good features is empty.')
+        sys.exit()
     max_count_len =  max((len(str(names[0][1])), len(str(names[-1][1]))))
     max_count_len += max_count_len/3 - 1
     logging.info('Max occurences {0:{2}} with {1:>{3},}'.format(names[0][0], names[0][1], max_name_len, max_count_len))
@@ -76,6 +80,9 @@ def prepare_prob_for_names(use_log):
             except ZeroDivisionError:
                 logging.error('Zero dividead x:{} y:{}\n s1:{}\n s2:{}\n t:{}'.format(
                     x, y, single[name[0]], single[name[1]], total ))
+        if x == 'con_1':
+            logging.debug('Count x:{} y:{}\n s1:{}\n s2:{}\n t:{}\n result: {}'.format(
+                x, y, single[name[0]], single[name[1]], total, out ))
         return out
     return probability_for_names
 
@@ -121,9 +128,12 @@ def main():
         remove_features(names, config.lift_dev, probability_for_names, config.lift_dump_file)
     with open(config.out_file, 'w') as fw:
         logging.info('Writing to file {}'.format(config.out_file))
-        fw.write('\t'.join(names)+'\n')
+        #fw.write('\t'.join(names)+'\n')
+        #fw.write('\t'.join([str(single[name]) for name in names])+'\n')
         for x in names:
             line = []
+            line.append(x)
+            line.append(single[x])
             for y in names:
                 line.append(probability_for_names(x, y))
             fw.write( "\t".join(map(str, line)) + "\n")
