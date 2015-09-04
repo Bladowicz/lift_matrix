@@ -22,7 +22,7 @@ def line_to_singles(ll):
 
 def count_lines(inf):
     n = 0
-    for l in open(config.in_file):
+    for l in open(inf):
         n += 1
     return float(n)
 
@@ -49,8 +49,8 @@ def prepare_line_processor(spaces):
         line_to_pairs(all_parts)
     return fun
 
-def check_names(nn):
-    names = sorted(nn.iteritems(), reverse=True, key=lambda x: x[1])[:int(config.cut)]
+def check_names(nn, cut):
+    names = sorted(nn.iteritems(), reverse=True, key=lambda x: x[1])[:int(cut)]
     try:
         max_name_len = max((len(names[0][0]), len(names[-1][0])))
     except IndexError:
@@ -90,7 +90,7 @@ def remove_features(names, dev, probability, fw):
     bad_names = set()
     t = set(names)
     for y in t:
-        if abs(1 - probability('con_1', y)) < config.lift_dev:
+        if abs(1 - probability('con_1', y)) < fw:
             bad_names.add(y)
     for e in bad_names:
         names.remove(e)
@@ -103,31 +103,29 @@ def remove_features(names, dev, probability, fw):
             for line in bad_names:
                 fw.write(line + '\n')
 
-def main():
-    global config, single, pairs, total
-    config = src.input_parser.results
-    logging.info('Starting to parsing file {}'.format(config.in_file))
+def make_matrix(in_file, out_file, namespaces='h', cut=250, clog=False, lift_dev=None, lift_dump_file=None):
+    global single, pairs, total
+    logging.info('Starting to parsing file {}'.format(in_file))
 
     pairs = collections.Counter()
     single = collections.Counter()
-    total = count_lines(config.in_file)
-
+    total = count_lines(in_file)
     logging.info('Counting occurances.')
     print_progress = prepare_progress(total)
-    process_line = prepare_line_processor(config.namespaces)
-    for nr, line in enumerate(open(config.in_file)):
+    process_line = prepare_line_processor(namespaces)
+    for nr, line in enumerate(open(in_file)):
         line = line.rstrip().split('|')
         process_line(line)
         print_progress(nr)
     sys.stdout.write('\r{:100}\r'.format(''))
     sys.stdout.flush()
-    logging.info('Done counting. Triming to {0} top counts.'.format(config.cut))
-    names = check_names(single)
-    probability_for_names = prepare_prob_for_names(config.clog)
-    if config.lift_dev:
-        remove_features(names, config.lift_dev, probability_for_names, config.lift_dump_file)
-    with open(config.out_file, 'w') as fw:
-        logging.info('Writing to file {}'.format(config.out_file))
+    logging.info('Done counting. Triming to {0} top counts.'.format(cut))
+    names = check_names(single, cut)
+    probability_for_names = prepare_prob_for_names(clog)
+    if lift_dev:
+        remove_features(names, lift_dev, probability_for_names, lift_dump_file)
+    with open(out_file, 'w') as fw:
+        logging.info('Writing to file {}'.format(out_file))
         #fw.write('\t'.join(names)+'\n')
         #fw.write('\t'.join([str(single[name]) for name in names])+'\n')
         for x in names:
@@ -138,6 +136,21 @@ def main():
                 line.append(probability_for_names(x, y))
             fw.write( "\t".join(map(str, line)) + "\n")
         logging.info('Matrix saved.')
+
+
+def main():
+    global config, single, pairs, total
+    config = src.input_parser._get()
+
+    in_file = config.in_file
+    namespaces = config.namespaces
+    cut = config.cut
+    clog = config.clog
+    lift_dev = config.lift_dev
+    out_file = config.out_file
+
+    ## DO IT!!!
+    make_matrix(in_file, out_file, namespaces, cut, clog, lift_dev, )
 
 
 if __name__=="__main__":

@@ -91,4 +91,3 @@ def _get():
     out =  parser.parse_args()
     validate_args(out)
     return out
-results = _get()
